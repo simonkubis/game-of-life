@@ -1,8 +1,9 @@
 import tkinter as tk
+from tkinter.filedialog import askopenfile
 
 w, h = 600, 600
 win = tk.Tk()
-squareSize = 20
+squareSize = 60
 
 canvas = tk.Canvas(width=w, height=h)
 
@@ -10,9 +11,6 @@ def make_cell(event):
     id = canvas.find_withtag("current")[0]
     canvas.itemconfig(id, fill='yellow', tags="cell")
 
-def make_empty(event):
-    id = canvas.find_withtag("current")[0]
-    canvas.itemconfig(id, fill='black', tags="blank")
 
 def get_neighbours(id):
         line = w/squareSize
@@ -54,19 +52,34 @@ def run():
             if(data.count("yellow") < 2 or data.count("yellow") > 3):
                 to_delete.append(i)
     for d in range(0, len(to_delete)):
-        canvas.itemconfig(to_delete[d], fill='black')
+        canvas.itemconfig(to_delete[d], fill='black', tags="blank")
     for f in range(0, len(to_fill)):
-        canvas.itemconfig(to_fill[f], fill='yellow')
+        canvas.itemconfig(to_fill[f], fill='yellow', tags="cell")
 
 scene()
 
+
+def open_file():
+    positions = ''
+    file = askopenfile(parent=win, mode='rb', title="Choose a text file", filetypes=[("File", "*.txt")])
+    if file:
+       for line in file:
+           temp = str(line.strip())
+           positions += temp.split("b'")[1].split("'")[0]
+    for i in range(0, len(positions)):
+        char = positions[i]
+        if(char == "1"):
+            canvas.itemconfig(i + 1, fill='yellow', tags="cell")
+
+
 next = tk.Button(win, text='Next step', command=run)
-l = tk.Label(win, text = "L mouse - add cell | R mouse - remove cell | Next step - plays one step of simulation")
-l.pack()
+#play = tk.Button(win, text='Play', command=play)
+open = tk.Button(win, text='Open a file', command=open_file)
+open.pack()
+#play.pack()
 next.pack()
 
 
 canvas.tag_bind("blank", "<Button-1>", make_cell)
-canvas.tag_bind("cell", "<Button-3>", make_empty)
 canvas.pack()
 win.mainloop()
